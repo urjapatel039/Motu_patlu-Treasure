@@ -1,35 +1,40 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+import StartScreen from "./components/StartScreen";
+import MapScreen from "./components/MapScreen";
+import LocationScene from "./components/LocationScene";
+import CluesBoard from "./components/CluesBoard";
+import TreasureScene from "./components/TreasureScene";
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [gameStarted, setGameStarted] = useState(false);
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [clues, setClues] = useState([]);
+  const [treasureFound, setTreasureFound] = useState(false);
+
+  const handleFindClue = (clue) => {
+    if (!clues.includes(clue)) {
+      setClues([...clues, clue]);
+    }
+    setCurrentLocation(null);
+    if (clues.length + 1 >= 3) setTreasureFound(true); // Unlock treasure after 3 clues
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div style={{ textAlign: "center", padding: "20px" }}>
+      {!gameStarted && <StartScreen onStart={() => setGameStarted(true)} />}
 
-export default App
+      {gameStarted && !currentLocation && !treasureFound && (
+        <>
+          <CluesBoard clues={clues} />
+          <MapScreen setCurrentLocation={setCurrentLocation} />
+        </>
+      )}
+
+      {currentLocation && !treasureFound && (
+        <LocationScene location={currentLocation} onFindClue={handleFindClue} />
+      )}
+
+      {treasureFound && <TreasureScene />}
+    </div>
+  );
+}
